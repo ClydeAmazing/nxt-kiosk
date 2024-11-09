@@ -39,7 +39,7 @@ export default function OrderPage() {
         setQuantity(existingCartItem ? existingCartItem.quantity : 0); // Reset quantity when selecting a new item
     };
 
-    const handleAddToCart = () => {
+    const handleAddQuantity = () => {
         if (!selectedItem) {
             return
         }
@@ -55,6 +55,24 @@ export default function OrderPage() {
             quantity: 1,
         });
     }
+
+    const handleDeductQuantity = () => {
+        if (!selectedItem || quantity <= 0) {
+            return
+        }
+
+        const existingCartItem = cartItems.find(cartItem => cartItem.id === selectedItem.id)
+
+        // setSelectedItem(null);
+        const newQuantity = existingCartItem ? existingCartItem?.quantity - 1 : 1
+
+        setQuantity(newQuantity)
+
+        addToCart({
+            ...selectedItem,
+            quantity: -1,
+        });
+    };
 
     const handleClearCart = () => {
         clearCart();
@@ -105,6 +123,7 @@ export default function OrderPage() {
                                     className="border p-4 rounded cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleItemSelect(item)}
                                 >
+                                    <img src={item.image} alt={item.name} className="w-full h-32 object-cover rounded mb-2" />
                                     <h2 className="font-semibold text-lg">
                                         {item.name} - ${item.price.toFixed(2)}
                                     </h2>
@@ -113,6 +132,15 @@ export default function OrderPage() {
                                     {selectedItem && selectedItem.id == item.id && (
                                         <div className="mt-4">
                                             <h3 className="font-bold">Quantity</h3>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeductQuantity();
+                                                }}
+                                                className="m-2 bg-blue-500 text-white p-2 rounded"
+                                            >
+                                                -
+                                            </button>
                                             <input
                                                 type="number"
                                                 value={quantity}
@@ -124,11 +152,11 @@ export default function OrderPage() {
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleAddToCart();
+                                                    handleAddQuantity();
                                                 }}
-                                                className="ml-2 bg-blue-500 text-white p-2 rounded"
+                                                className="m-2 bg-blue-500 text-white p-2 rounded"
                                             >
-                                                + Add
+                                                +
                                             </button>
                                         </div>
                                     )}
@@ -136,11 +164,13 @@ export default function OrderPage() {
                             ))}
                         </ul>
                     </div>
+                    {/* Cart Component */}
+                    <Cart />
                     {/* Footer with Clear Cart and Proceed to Payment */}
                     <div className="bg-white border-t border-gray-300 p-4">
                         <div className="flex justify-between">
                             <button onClick={handleClearCart} className="bg-red-500 text-white py-2 px-4 rounded">
-                                Clear Cart
+                                Cancel Order
                             </button>
                             <button onClick={handleProceedToPayment} className="bg-green-500 text-white py-2 px-4 rounded">
                                 Proceed to Payment
@@ -148,9 +178,6 @@ export default function OrderPage() {
                         </div>
                     </div>
                 </main>
-
-                {/* Cart Component */}
-                <Cart />
             </div>
         </div>
     )

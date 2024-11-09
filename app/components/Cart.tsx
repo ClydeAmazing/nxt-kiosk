@@ -31,11 +31,9 @@ export default function Cart() {
       <div>
           {/* Collapsed Cart Summary */}
           {isCollapsed ? (
-              <div 
-                  onClick={toggleCollapse} 
-                  className="fixed top-0 right-0 m-4 p-4 bg-gray-800 text-white rounded-lg shadow-lg cursor-pointer z-50"
-              >
+              <div className="bg-orange-300 p-2 flex justify-between">
                   <span>Cart ({cartItems.length} items)</span>
+                  <button className="font-bold" onClick={toggleCollapse} >View Order</button>
               </div>
           ) : (
               /* Expanded Cart Details */
