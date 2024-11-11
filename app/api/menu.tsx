@@ -1,69 +1,25 @@
-import { MenuData } from "./types";
+import PocketBase from 'pocketbase';
 
-// Simulating an API call to get the menu data
-const menuData = {
-    categories: [
-      { id: '1', name: 'Burgers' },
-      { id: '2', name: 'Drinks' },
-      { id: '3', name: 'Sides' },
-      { id: '4', name: 'Desserts' },
-    ],
-    items: [
-      {
-        id: '101',
-        name: 'Big Mac',
-        category: 'Burgers',
-        price: 3.99,
-        description: 'Two beef patties, special sauce, lettuce, cheese, pickles, onions on a sesame seed bun.',
-        image: '/mock-images/big-mac.jpg'
-      },
-      {
-        id: '102',
-        name: 'Quarter Pounder',
-        category: 'Burgers',
-        price: 4.49,
-        description: 'Quarter pound of 100% beef, with cheese, pickles, onions, ketchup, and mustard on a sesame seed bun.',
-        image: '/mock-images/quarter-pounder.jpg'
-      },
-      {
-        id: '201',
-        name: 'Coke',
-        category: 'Drinks',
-        price: 1.49,
-        description: 'Refreshing soft drink.',
-        image: '/mock-images/coca-cola.jpg'
-      },
-      {
-        id: '202',
-        name: 'Sprite',
-        category: 'Drinks',
-        price: 1.49,
-        description: 'Crisp, refreshing lemon-lime flavored soft drink.',
-        image: '/mock-images/sprite.png'
-      },
-      {
-        id: '301',
-        name: 'French Fries',
-        category: 'Sides',
-        price: 1.89,
-        description: 'Crispy golden fries, seasoned to perfection.',
-        image: '/mock-images/french-fries.png'
-      },
-      {
-        id: '401',
-        name: 'McFlurry',
-        category: 'Desserts',
-        price: 2.49,
-        description: 'Creamy vanilla soft serve with mix-ins.',
-        image: '/mock-images/mcflurry.png'
-      },
-    ],
-  };
+import { MenuItem, MenuCategory, MenuData } from "./types";
+
+const pbURL = 'http://127.0.0.1:8090';
+const pb = new PocketBase(pbURL);
+
+export async function fetchMenu(): Promise<MenuData>{
+  const categories = await pb.collection('categories').getFullList<MenuCategory>();
+
+  const menuItems = await pb.collection('menu').getFullList<MenuItem>({
+    sort: '-created',
+  });
   
-  export const fetchMenu = (): Promise<MenuData> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(menuData);
-      }, 1000); // Simulating network delay
-    });
+  const data:MenuData = {
+    'categories': categories,
+    'items': menuItems
   };
+
+  return data;
+}
+
+export function getImageUrl(item: MenuItem): string {
+  return `${pbURL}/api/files/menu/${item.id}/${item.image}`;
+}

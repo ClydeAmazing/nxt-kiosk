@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useOrderContext } from "../context/OrderContext";
 
-import { fetchMenu } from "../api/menu";
-import { MenuData, MenuItem } from "../api/types";
+import { fetchMenu, getImageUrl } from "../api/menu";
+import { MenuCategory, MenuData, MenuItem } from "../api/types";
 import Cart from "../components/Cart";
 import { useRouter } from "next/navigation";
 
@@ -12,25 +12,25 @@ export default function OrderPage() {
     const router = useRouter();
     const { addToCart, cartItems, clearCart } = useOrderContext();
     const [ menu, setMenu ] = useState<MenuData>({ categories: [], items: [] });
-    const [ selectedCategory, setSelectedCategory ] = useState<string>('Burgers');
+    const [ selectedCategory, setSelectedCategory ] = useState<MenuCategory>();
     const [ selectedItem, setSelectedItem ] = useState<MenuItem | null>(null);
     const [ quantity, setQuantity ] = useState<number>(0);
-    const [ showCart, setShowCart ] = useState<boolean>(true);
 
     useEffect(() => {
         const loadMenu = async () => {
             const menuData = await fetchMenu();
             setMenu(menuData);
+            setSelectedCategory(menuData.categories[0]);
         }
 
         loadMenu();
     }, []);
 
-    const handleCategoryChange = (category: string) => {
+    const handleCategoryChange = (category: MenuCategory) => {
         setSelectedCategory(category);
     };
 
-    const filteredItems = menu.items.filter(item => item.category === selectedCategory);
+    const filteredItems = menu.items.filter(item => item.category === selectedCategory?.id);
 
     const handleItemSelect = (item: MenuItem) => {
         setSelectedItem(item);
@@ -103,7 +103,7 @@ export default function OrderPage() {
                             <li
                                 key={category.id}
                                 className="mb-2 cursor-pointer hover:text-blue-600"
-                                onClick={() => handleCategoryChange(category.name)}
+                                onClick={() => handleCategoryChange(category)}
                             >
                                 {category.name}
                             </li>
@@ -113,7 +113,7 @@ export default function OrderPage() {
 
                 {/* Main Menu Area */}
                 <main className="p-4 flex-1 flex flex-col h-full">
-                    <h1 className="text-2xl font-bold mb-4">{selectedCategory}</h1>
+                    <h1 className="text-2xl font-bold mb-4">{selectedCategory?.name}</h1>
                     <div className="flex-grow">
                         {/* Grid of Menu Items */}
                         <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -123,7 +123,7 @@ export default function OrderPage() {
                                     className="border p-4 rounded cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleItemSelect(item)}
                                 >
-                                    <img src={item.image} alt={item.name} className="w-full h-32 object-cover rounded mb-2" />
+                                    <img src={getImageUrl(item)} alt={item.name} className="w-full h-32 object-cover rounded mb-2" />
                                     <h2 className="font-semibold text-lg">
                                         {item.name} - ${item.price.toFixed(2)}
                                     </h2>
