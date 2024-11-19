@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useOrderContext } from "../context/OrderContext";
-
-import { fetchMenu, getImageUrl } from "../api/menu";
 import { MenuCategory, MenuData, MenuItem, MenuVariation } from "../api/types";
 import Cart from "../components/Cart";
 import { useRouter } from "next/navigation";
@@ -14,10 +12,15 @@ import MenuSkeleton from '../components/MenuSkeleton';
 
 export default function OrderPage() {
     const { menuData, isLoading, error } = useMenu();
-    const { orderType, addToCart, cartItems, clearCart } = useOrderContext();
+    const { orderType, addToCart, cartItems } = useOrderContext();
     const router = useRouter();
     const [ selectedCategory, setSelectedCategory ] = useState<MenuCategory>();
-    const [ quantity, setQuantity ] = useState<number>(0);
+
+    useEffect(() => {
+        if (menuData.categories.length > 0 && !selectedCategory) {
+            setSelectedCategory(menuData.categories[0]);
+        }
+    }, [menuData.categories, selectedCategory]);
 
     useEffect(() => {
         if (!orderType) {
@@ -64,18 +67,6 @@ export default function OrderPage() {
             ...item,
             quantity: -1,
         });
-    };
-
-    const handleClearCart = () => {
-        clearCart();
-    };
-
-    const handleProceedToPayment = () => {
-      if (cartItems.length > 0){
-          router.push('/payment');
-      }else{
-          alert("Your cart is empty. Please add items before proceeding to payment.")
-      }
     };
 
     return (

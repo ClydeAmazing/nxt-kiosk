@@ -66,28 +66,45 @@ export default function PaymentPage() {
                         onClick={() => setSelectedMethod(method.id)}
                         className={`w-full p-4 rounded-lg border-2 transition-all flex items-center gap-4
                             ${selectedMethod === method.id 
-                                ? 'border-primary-400 bg-primary-50' 
-                                : 'border-gray-200 hover:border-primary-200'
+                                ? 'border-teal-600 bg-teal-50 ring-2 ring-teal-600 ring-opacity-50' 
+                                : 'border-gray-200 hover:border-teal-200 hover:bg-gray-50'
                             }`}
                     >
-                        <span className="text-2xl">{method.icon}</span>
-                        <span className="font-medium text-gray-800">{method.name}</span>
+                        <div className={`text-2xl p-2 rounded-full 
+                            ${selectedMethod === method.id 
+                                ? 'bg-teal-100' 
+                                : 'bg-gray-100'
+                            }`}>
+                            {method.icon}
+                        </div>
+                        <div className="flex flex-col items-start">
+                            <span className={`font-medium ${
+                                selectedMethod === method.id 
+                                    ? 'text-teal-700' 
+                                    : 'text-gray-800'
+                            }`}>
+                                {method.name}
+                            </span>
+                        </div>
                     </button>
                 ))}
             </div>
 
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t z-50">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg">
                 <div className="max-w-md mx-auto">
                     <button
                         onClick={handlePayment}
                         disabled={!selectedMethod}
-                        className={`w-full py-3 rounded-lg text-white font-medium transition-colors
+                        className={`w-full py-4 rounded-lg text-white font-semibold text-lg transition-all transform
                             ${selectedMethod 
-                                ? 'bg-primary-600 hover:bg-primary-700' 
-                                : 'bg-gray-300 cursor-not-allowed'
+                                ? 'bg-teal-600 hover:bg-teal-700 hover:shadow-md active:scale-[0.99]' 
+                                : 'bg-gray-300 cursor-not-allowed opacity-75'
                             }`}
                     >
-                        Pay ${total.toFixed(2)}
+                        {selectedMethod 
+                            ? `Pay $${total.toFixed(2)}`
+                            : 'Select a payment method'
+                        }
                     </button>
                 </div>
             </div>

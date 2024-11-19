@@ -12,7 +12,7 @@ export default function ClientLayout({
     <OrderProvider>
       <div className="flex flex-col min-h-screen bg-gray-50">
         <Header />
-        <main className="flex-1 container">
+        <main className="flex-1">
           {children}
         </main>
       </div>

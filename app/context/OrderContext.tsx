@@ -18,6 +18,8 @@ type OrderContextType = {
     addToCart: (item: CartItem) => void;
     removeFromCart: (id: string) => void;
     clearCart: () => void;
+    currentOrderId?: string;
+    setCurrentOrderId?: (id: string) => void;
 }
 
 // Create the context

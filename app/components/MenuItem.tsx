@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { MenuItem as MenuItemType, MenuVariation } from "../api/types";
+import { MenuItem as MenuItemType } from "../api/types";
 import { getImageUrl } from "../api/menu";
 
 interface MenuItemProps {
@@ -29,6 +29,8 @@ export default function MenuItemCard({
           fill
           className="object-cover rounded-lg"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          priority={false}
+          loading="lazy"
         />
       </div>
       

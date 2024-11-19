@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MenuData } from '../api/types';
 import { menuService } from '../services/menuService';
 
@@ -6,32 +6,28 @@ export function useMenu() {
   const [menuData, setMenuData] = useState<MenuData>({ categories: [], items: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const fetchStarted = useRef(false);
 
   useEffect(() => {
-    const abortController = new AbortController();
-
-    const fetchMenu = async () => {
+    if (fetchStarted.current) return;
+    fetchStarted.current = true;
+    
+    console.log('Starting menu fetch...');
+    
+    async function fetchMenu() {
       try {
-        setIsLoading(true);
-        const data = await menuService.getMenu(abortController.signal);
+        const data = await menuService.getMenu();
+        console.log('Menu fetch successful:', data);
         setMenuData(data);
-        setError(null);
       } catch (err) {
-        if (!abortController.signal.aborted) {
-          setError(err instanceof Error ? err : new Error('Failed to fetch menu'));
-        }
+        console.error('Menu fetch error:', err);
+        setError(err instanceof Error ? err : new Error('Failed to fetch menu'));
       } finally {
-        if (!abortController.signal.aborted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
-    };
+    }
 
     fetchMenu();
-
-    return () => {
-      abortController.abort();
-    };
   }, []);
 
   return { menuData, isLoading, error };

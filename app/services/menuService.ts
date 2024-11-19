@@ -1,27 +1,21 @@
 import { getPocketbaseInstance } from '../lib/pocketbase';
 import { MenuItem, MenuCategory, MenuData } from '../api/types';
+import PocketBase from 'pocketbase';
 
 export class MenuService {
-  private static instance: MenuService;
-  private pb = getPocketbaseInstance();
+  private pb: PocketBase;
 
-  private constructor() {}
-
-  public static getInstance(): MenuService {
-    if (!MenuService.instance) {
-      MenuService.instance = new MenuService();
-    }
-    return MenuService.instance;
+  constructor() {
+    this.pb = new PocketBase(process.env.NEXT_PUBLIC_POCKETBASE_URL || 'http://127.0.0.1:8090');
   }
 
-  async getMenu(signal?: AbortSignal): Promise<MenuData> {
+  async getMenu(): Promise<MenuData> {
     try {
       const [categories, menuItems] = await Promise.all([
-        this.pb.collection('categories').getFullList<MenuCategory>({ signal }),
+        this.pb.collection('categories').getFullList<MenuCategory>(),
         this.pb.collection('menu').getFullList<MenuItem>({
           sort: '-created',
           expand: 'variations',
-          signal
         })
       ]);
 
@@ -45,5 +39,5 @@ export class MenuService {
   }
 }
 
-// Export singleton instance
-export const menuService = MenuService.getInstance(); 
+// Export a simple instance
+export const menuService = new MenuService(); 
