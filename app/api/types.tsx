@@ -7,14 +7,25 @@ export interface MenuItem {
     price: number;
     description: string;
     image: string;
+    expand?: {
+      variations: MenuVariation[]; // Use the correct field name for the expanded data
+    };
+    variations: MenuVariation[];
   }
+
+export interface MenuVariation {
+  id: string;
+  name: string;
+  type: string;
+  price_variation: string;
+}
   
-  export interface MenuCategory {
-    id: string;
-    name: string;
-  }
-  
-  export interface MenuData {
-    categories: MenuCategory[];
-    items: MenuItem[];
-  }
+export interface MenuCategory {
+  id: string;
+  name: string;
+}
+
+export interface MenuData {
+  categories: MenuCategory[];
+  items: MenuItem[];
+}

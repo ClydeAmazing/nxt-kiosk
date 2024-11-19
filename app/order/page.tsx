@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useOrderContext } from "../context/OrderContext";
 
 import { fetchMenu, getImageUrl } from "../api/menu";
-import { MenuCategory, MenuData, MenuItem } from "../api/types";
+import { MenuCategory, MenuData, MenuItem, MenuVariation } from "../api/types";
 import Cart from "../components/Cart";
 import { useRouter } from "next/navigation";
 
@@ -14,11 +14,13 @@ export default function OrderPage() {
     const [ menu, setMenu ] = useState<MenuData>({ categories: [], items: [] });
     const [ selectedCategory, setSelectedCategory ] = useState<MenuCategory>();
     const [ selectedItem, setSelectedItem ] = useState<MenuItem | null>(null);
+    const [selectedVariation, setSelectedVariation] = useState<MenuVariation | null>(null);
     const [ quantity, setQuantity ] = useState<number>(0);
 
     useEffect(() => {
         const loadMenu = async () => {
             const menuData = await fetchMenu();
+            console.log(menuData)
             setMenu(menuData);
             setSelectedCategory(menuData.categories[0]);
         }
@@ -38,6 +40,10 @@ export default function OrderPage() {
         const existingCartItem = cartItems.find(cartItem => cartItem.id === item.id);
         setQuantity(existingCartItem ? existingCartItem.quantity : 0); // Reset quantity when selecting a new item
     };
+
+    const handleVariationChange = (variation: MenuVariation) => {
+        setSelectedVariation(variation);
+      };
 
     const handleAddQuantity = () => {
         if (!selectedItem) {
@@ -128,6 +134,24 @@ export default function OrderPage() {
                                         {item.name} - ${item.price.toFixed(2)}
                                     </h2>
                                     <p>{item.description}</p>
+                                    {item.variations && item.variations.length > 0 && (
+                                        <div>
+                                        <h4>Select Variation:</h4>
+                                        <select
+                                            onChange={(e) => {
+                                            const variation = item.variations.find(v => v.id === e.target.value);
+                                            if (variation) handleVariationChange(variation);
+                                            }}
+                                        >
+                                            <option value="">Select...</option>
+                                            {item.variations.map(variation => (
+                                            <option key={variation.id} value={variation.id}>
+                                                {variation.name} (+${variation.price_variation})
+                                            </option>
+                                            ))}
+                                        </select>
+                                        </div>
+                                    )}
                                     {/* Quantity Selector & Add to Cart */}
                                     {selectedItem && selectedItem.id == item.id && (
                                         <div className="mt-4">

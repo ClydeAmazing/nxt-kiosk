@@ -10,11 +10,17 @@ export async function fetchMenu(): Promise<MenuData>{
 
   const menuItems = await pb.collection('menu').getFullList<MenuItem>({
     sort: '-created',
+    expand: 'variations'
   });
+
+  const itemsWithVariations = menuItems.map(item => ({
+    ...item,
+    variations: item.expand?.variations || []
+  }))
   
   const data:MenuData = {
     'categories': categories,
-    'items': menuItems
+    'items': itemsWithVariations
   };
 
   return data;
