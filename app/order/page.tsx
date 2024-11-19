@@ -7,75 +7,61 @@ import { fetchMenu, getImageUrl } from "../api/menu";
 import { MenuCategory, MenuData, MenuItem, MenuVariation } from "../api/types";
 import Cart from "../components/Cart";
 import { useRouter } from "next/navigation";
+import MenuItemCard from "../components/MenuItem";
+import CategorySidebar from "../components/CategorySidebar";
+import { useMenu } from "../hooks/useMenu";
+import MenuSkeleton from '../components/MenuSkeleton';
 
 export default function OrderPage() {
+    const { menuData, isLoading, error } = useMenu();
+    const { orderType, addToCart, cartItems, clearCart } = useOrderContext();
     const router = useRouter();
-    const { addToCart, cartItems, clearCart } = useOrderContext();
-    const [ menu, setMenu ] = useState<MenuData>({ categories: [], items: [] });
     const [ selectedCategory, setSelectedCategory ] = useState<MenuCategory>();
-    const [ selectedItem, setSelectedItem ] = useState<MenuItem | null>(null);
-    const [selectedVariation, setSelectedVariation] = useState<MenuVariation | null>(null);
     const [ quantity, setQuantity ] = useState<number>(0);
 
     useEffect(() => {
-        const loadMenu = async () => {
-            const menuData = await fetchMenu();
-            console.log(menuData)
-            setMenu(menuData);
-            setSelectedCategory(menuData.categories[0]);
+        if (!orderType) {
+            router.push('/');
         }
+    }, [orderType, router]);
 
-        loadMenu();
-    }, []);
+    if (!orderType) {
+        return null;
+    }
+
+    if (isLoading) {
+        return <MenuSkeleton />;
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-red-600">Error loading menu: {error.message}</div>
+            </div>
+        );
+    }
 
     const handleCategoryChange = (category: MenuCategory) => {
         setSelectedCategory(category);
     };
 
-    const filteredItems = menu.items.filter(item => item.category === selectedCategory?.id);
+    const filteredItems = menuData.items.filter(item => item.category === selectedCategory?.id);
 
-    const handleItemSelect = (item: MenuItem) => {
-        setSelectedItem(item);
-
-        const existingCartItem = cartItems.find(cartItem => cartItem.id === item.id);
-        setQuantity(existingCartItem ? existingCartItem.quantity : 0); // Reset quantity when selecting a new item
+    const getItemQuantity = (itemId: string) => {
+        const item = cartItems.find(item => item.id === itemId);
+        return item?.quantity || 0;
     };
 
-    const handleVariationChange = (variation: MenuVariation) => {
-        setSelectedVariation(variation);
-      };
-
-    const handleAddQuantity = () => {
-        if (!selectedItem) {
-            return
-        }
-
-        const existingCartItem = cartItems.find(cartItem => cartItem.id === selectedItem.id)
-
-        // setSelectedItem(null);
-        const newQuantity = existingCartItem ? existingCartItem?.quantity + 1 : 1
-        setQuantity(newQuantity)
-
+    const handleAddQuantity = (item: MenuItem) => {
         addToCart({
-            ...selectedItem,
+            ...item,
             quantity: 1,
         });
     }
 
-    const handleDeductQuantity = () => {
-        if (!selectedItem || quantity <= 0) {
-            return
-        }
-
-        const existingCartItem = cartItems.find(cartItem => cartItem.id === selectedItem.id)
-
-        // setSelectedItem(null);
-        const newQuantity = existingCartItem ? existingCartItem?.quantity - 1 : 1
-
-        setQuantity(newQuantity)
-
+    const handleDeductQuantity = (item: MenuItem) => {
         addToCart({
-            ...selectedItem,
+            ...item,
             quantity: -1,
         });
     };
@@ -94,28 +80,14 @@ export default function OrderPage() {
 
     return (
         <div className="h-screen flex flex-col">
-            {/* Header (optional) */}
-            <header className="p-4 bg-gray-800 text-white">
-                <h1 className="text-3xl font-bold">Welcome to Our Kiosk</h1>
-            </header>
-
             {/* Main Content Area */}
             <div className="flex flex-1 overflow-y-auto h-screen">
                 {/* Sidebar */}
-                <aside className="w-1/4 bg-gray-200 p-4">
-                    <h2 className="font-bold text-xl mb-4">Categories</h2>
-                    <ul>
-                        {menu.categories.map((category) => (
-                            <li
-                                key={category.id}
-                                className="mb-2 cursor-pointer hover:text-blue-600"
-                                onClick={() => handleCategoryChange(category)}
-                            >
-                                {category.name}
-                            </li>
-                        ))}
-                    </ul>
-                </aside>
+                <CategorySidebar
+                    categories={menuData.categories}
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={handleCategoryChange}
+                />
 
                 {/* Main Menu Area */}
                 <main className="p-4 flex-1 flex flex-col h-full">
@@ -124,83 +96,18 @@ export default function OrderPage() {
                         {/* Grid of Menu Items */}
                         <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {filteredItems.map((item) => (
-                                <li
+                                <MenuItemCard
                                     key={item.id}
-                                    className="border p-4 rounded cursor-pointer hover:bg-gray-100"
-                                    onClick={() => handleItemSelect(item)}
-                                >
-                                    <img src={getImageUrl(item)} alt={item.name} className="w-full h-32 object-cover rounded mb-2" />
-                                    <h2 className="font-semibold text-lg">
-                                        {item.name} - ${item.price.toFixed(2)}
-                                    </h2>
-                                    <p>{item.description}</p>
-                                    {item.variations && item.variations.length > 0 && (
-                                        <div>
-                                        <h4>Select Variation:</h4>
-                                        <select
-                                            onChange={(e) => {
-                                            const variation = item.variations.find(v => v.id === e.target.value);
-                                            if (variation) handleVariationChange(variation);
-                                            }}
-                                        >
-                                            <option value="">Select...</option>
-                                            {item.variations.map(variation => (
-                                            <option key={variation.id} value={variation.id}>
-                                                {variation.name} (+${variation.price_variation})
-                                            </option>
-                                            ))}
-                                        </select>
-                                        </div>
-                                    )}
-                                    {/* Quantity Selector & Add to Cart */}
-                                    {selectedItem && selectedItem.id == item.id && (
-                                        <div className="mt-4">
-                                            <h3 className="font-bold">Quantity</h3>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeductQuantity();
-                                                }}
-                                                className="m-2 bg-blue-500 text-white p-2 rounded"
-                                            >
-                                                -
-                                            </button>
-                                            <input
-                                                type="number"
-                                                value={quantity}
-                                                min="1"
-                                                readOnly
-                                                // onChange={(e) => setQuantity(Number(e.target.value))}
-                                                className="border p-2 rounded w-20"
-                                            />
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleAddQuantity();
-                                                }}
-                                                className="m-2 bg-blue-500 text-white p-2 rounded"
-                                            >
-                                                +
-                                            </button>
-                                        </div>
-                                    )}
-                                </li>
+                                    item={item}
+                                    quantity={getItemQuantity(item.id)}
+                                    onAddQuantity={handleAddQuantity}
+                                    onDeductQuantity={handleDeductQuantity}
+                                />
                             ))}
                         </ul>
                     </div>
                     {/* Cart Component */}
                     <Cart />
-                    {/* Footer with Clear Cart and Proceed to Payment */}
-                    <div className="bg-white border-t border-gray-300 p-4">
-                        <div className="flex justify-between">
-                            <button onClick={handleClearCart} className="bg-red-500 text-white py-2 px-4 rounded">
-                                Cancel Order
-                            </button>
-                            <button onClick={handleProceedToPayment} className="bg-green-500 text-white py-2 px-4 rounded">
-                                Proceed to Payment
-                            </button>
-                        </div>
-                    </div>
                 </main>
             </div>
         </div>

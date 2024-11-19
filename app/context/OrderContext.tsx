@@ -31,14 +31,24 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
     const addToCart = (item: CartItem) => {
         setCartItems(prevItems => {
             const existingItem = prevItems.find(cartItem => cartItem.id === item.id);
-            if (existingItem){
+            if (existingItem) {
+                const newQuantity = existingItem.quantity + item.quantity;
+                // Remove item if quantity becomes 0 or less
+                if (newQuantity <= 0) {
+                    return prevItems.filter(cartItem => cartItem.id !== item.id);
+                }
+                // Update quantity if item exists
                 return prevItems.map(cartItem => 
                     cartItem.id === item.id
-                    ? { ...cartItem, quantity: cartItem.quantity + item.quantity}
+                    ? { ...cartItem, quantity: newQuantity }
                     : cartItem
                 );
             }
-            return [...prevItems, item];
+            // Only add new item if quantity is positive
+            if (item.quantity > 0) {
+                return [...prevItems, item];
+            }
+            return prevItems;
         });
     };
 
