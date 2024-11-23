@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MenuData } from '../api/types';
+import { MenuData } from '@/app/types';
 import { menuService } from '../services/menuService';
 
 export function useMenu() {

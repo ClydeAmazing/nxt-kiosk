@@ -1,5 +1,4 @@
-import { getPocketbaseInstance } from '../lib/pocketbase';
-import { MenuItem, MenuCategory, MenuData } from '../api/types';
+import { MenuItem, MenuCategory, MenuData } from '@/app/types';
 import PocketBase from 'pocketbase';
 
 export class MenuService {

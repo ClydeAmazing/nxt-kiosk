@@ -71,6 +71,15 @@ export default function Cart() {
                                         >
                                             <div>
                                                 <h3 className="font-semibold">{item.name}</h3>
+                                                {Object.entries(item.selectedVariations || {}).length > 0 && (
+                                                    <div className="text-sm text-gray-500 mt-1">
+                                                        {Object.entries(item.selectedVariations || {}).map(([key, value]) => (
+                                                            <span key={key} className="mr-2">
+                                                                {key}: {value}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
                                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                                     <span>Quantity: {item.quantity}</span>
                                                     <span>•</span>

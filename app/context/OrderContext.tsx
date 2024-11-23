@@ -4,11 +4,25 @@ import { createContext, ReactNode, useContext, useState } from "react";
 
 
 // Define a type for the context state
+type ProductVariation = {
+    name: string;  // e.g., "Size"
+    options: string[];  // e.g., ["Small", "Medium", "Large"]
+}
+
+type Product = {
+    id: string;
+    name: string;
+    price: number;
+    // hasVariations: boolean;
+    variations?: ProductVariation[];  // Available variation options
+}
+
 type CartItem = {
     id: string;
     name: string;
     price: number;
     quantity: number;
+    selectedVariations?: Record<string, string>;  // e.g., { Size: "Large" }
 }
 
 type OrderContextType = {
@@ -20,6 +34,9 @@ type OrderContextType = {
     clearCart: () => void;
     currentOrderId?: string;
     setCurrentOrderId?: (id: string) => void;
+    openVariationModal: (product: Product) => void;
+    isVariationModalOpen: boolean;
+    selectedProduct: Product | null;
 }
 
 // Create the context
@@ -29,10 +46,15 @@ const OrderContext = createContext<OrderContextType | undefined>(undefined);
 export const OrderProvider = ({ children }: { children: ReactNode }) => {
     const [orderType, setOrderType] = useState<string | null>(null);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [isVariationModalOpen, setIsVariationModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     
     const addToCart = (item: CartItem) => {
         setCartItems(prevItems => {
-            const existingItem = prevItems.find(cartItem => cartItem.id === item.id);
+            const existingItem = prevItems.find(cartItem => 
+                cartItem.id === item.id && 
+                JSON.stringify(cartItem.selectedVariations) === JSON.stringify(item.selectedVariations)
+            );
             if (existingItem) {
                 const newQuantity = existingItem.quantity + item.quantity;
                 // Remove item if quantity becomes 0 or less
@@ -41,9 +63,10 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
                 }
                 // Update quantity if item exists
                 return prevItems.map(cartItem => 
-                    cartItem.id === item.id
-                    ? { ...cartItem, quantity: newQuantity }
-                    : cartItem
+                    cartItem.id === item.id && 
+                    JSON.stringify(cartItem.selectedVariations) === JSON.stringify(item.selectedVariations)
+                        ? { ...cartItem, quantity: newQuantity }
+                        : cartItem
                 );
             }
             // Only add new item if quantity is positive
@@ -62,8 +85,13 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
         setCartItems([]);
     }
 
+    const openVariationModal = (product: Product) => {
+        setSelectedProduct(product);
+        setIsVariationModalOpen(true);
+    };
+
     return (
-        <OrderContext.Provider value={{ orderType, setOrderType, cartItems, addToCart, removeFromCart, clearCart }}>
+        <OrderContext.Provider value={{ orderType, setOrderType, cartItems, addToCart, removeFromCart, clearCart, openVariationModal, isVariationModalOpen, selectedProduct }}>
             { children }
         </OrderContext.Provider>
     )

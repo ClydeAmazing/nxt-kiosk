@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useOrderContext } from "../context/OrderContext";
-import { MenuCategory, MenuData, MenuItem, MenuVariation } from "../api/types";
+import { MenuCategory, MenuData, MenuItem } from "@/app/types";
 import Cart from "../components/Cart";
 import { useRouter } from "next/navigation";
 import MenuItemCard from "../components/MenuItem";
@@ -50,25 +50,6 @@ export default function OrderPage() {
 
     const filteredItems = menuData.items.filter(item => item.category === selectedCategory?.id);
 
-    const getItemQuantity = (itemId: string) => {
-        const item = cartItems.find(item => item.id === itemId);
-        return item?.quantity || 0;
-    };
-
-    const handleAddQuantity = (item: MenuItem) => {
-        addToCart({
-            ...item,
-            quantity: 1,
-        });
-    }
-
-    const handleDeductQuantity = (item: MenuItem) => {
-        addToCart({
-            ...item,
-            quantity: -1,
-        });
-    };
-
     return (
         <div className="h-screen flex flex-col">
             {/* Main Content Area */}
@@ -90,9 +71,6 @@ export default function OrderPage() {
                                 <MenuItemCard
                                     key={item.id}
                                     item={item}
-                                    quantity={getItemQuantity(item.id)}
-                                    onAddQuantity={handleAddQuantity}
-                                    onDeductQuantity={handleDeductQuantity}
                                 />
                             ))}
                         </ul>

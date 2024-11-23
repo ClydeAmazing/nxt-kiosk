@@ -1,4 +1,4 @@
-import { MenuCategory } from "../api/types";
+import { MenuCategory } from "@/app/types";
 
 interface CategorySidebarProps {
   categories: MenuCategory[];
