@@ -2,7 +2,6 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { MenuItem, CartItem, OrderContextType } from "@/app/types";
 import { menuService } from "@/app/services/menuService";
-import ItemVariationSelector from './ItemVariationSelector';
 import VariationModal from './VariationModal';
 import { useOrderContext } from '../context/OrderContext';
 
@@ -40,18 +39,18 @@ export default function MenuItemCard({ item }: MenuItemProps) {
       quantity: quantity,
       selectedVariations: variations
     });
-
-    console.log(addToCart);
-    console.log(variations);
   }
 
   const handleConfirmVariations = () => {
-    handleUpdateCart(item, 1, selectedVariations);
+    console.log(selectedVariations);
+    console.log(quantity);
+
+    // handleUpdateCart(item, 1, selectedVariations);
     setIsVariationModalOpen(false);
   };
 
   const handleAddToCart = () => {
-    if (item.variations && item.variations.length > 0) {
+    if (item.variation_groups && item.variation_groups.length > 0) {
       setIsVariationModalOpen(true);
     } else {
       handleUpdateCart(item, 1);
@@ -113,7 +112,11 @@ export default function MenuItemCard({ item }: MenuItemProps) {
               </span>
               <button
                 onClick={() => {
-                  handleUpdateCart(item, 1);
+                  if (item.variation_groups && item.variation_groups.length > 0) {
+                    setIsVariationModalOpen(true);
+                  } else {
+                    handleUpdateCart(item, 1);
+                  }
                 }}
                 className="bg-teal-600 text-white py-2 rounded-lg hover:bg-teal-700 transition-colors shadow-sm"
               >

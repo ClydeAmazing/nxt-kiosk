@@ -14,13 +14,13 @@ export class MenuService {
         this.pb.collection('categories').getFullList<MenuCategory>(),
         this.pb.collection('menu').getFullList<MenuItem>({
           sort: '-created',
-          expand: 'variations',
+          expand: 'variation_groups.variations',
         })
       ]);
 
       const itemsWithVariations = menuItems.map(item => ({
         ...item,
-        variations: item.expand?.variations || []
+        variation_groups: item.expand?.variation_groups || []
       }));
 
       return {
