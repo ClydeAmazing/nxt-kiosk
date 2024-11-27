@@ -1,6 +1,9 @@
 import { MenuItem } from "./menu";
 
-export type OrderType = 'DineIn' | 'TakeAway';
+export enum OrderType {
+  DineIn = "DINE_IN",
+  TakeOut = "TAKE_OUT",
+}
 
 export interface SelectedVariations {
   [groupId: string]: string[]; // Array of variation IDs for each group

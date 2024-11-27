@@ -10,8 +10,7 @@ interface MenuItemProps {
 }
 
 export default function MenuItemCard({ item }: MenuItemProps) {
-  const { orderType, addToCart, cartItems } = useOrderContext();
-  const [selectedVariations, setSelectedVariations] = useState<Record<string, string>>({});
+  const { addToCart, cartItems } = useOrderContext();
   const [isVariationModalOpen, setIsVariationModalOpen] = useState(false);
 
   const getItemQuantity = (itemId: string, variations?: Record<string, string>) => {
@@ -31,7 +30,7 @@ export default function MenuItemCard({ item }: MenuItemProps) {
 
   const quantity = getItemQuantity(item.id); // Get total quantity of item in cart
 
-  const handleUpdateCart = (item: MenuItem, quantity: number, variations?: Record<string, string>) => {
+  const handleUpdateCart = (item: MenuItem, quantity: number, variations?: SelectedVariations) => {
     addToCart({
       id: item.id,
       name: item.name,
@@ -42,7 +41,7 @@ export default function MenuItemCard({ item }: MenuItemProps) {
   }
 
   const handleConfirmVariations = (item: MenuItem, variations: SelectedVariations, quantity: number) => {
-    handleUpdateCart(item, quantity, selectedVariations);
+    handleUpdateCart(item, quantity, variations);
   };
 
   const handleAddToCart = () => {

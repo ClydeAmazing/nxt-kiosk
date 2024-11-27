@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, ReactNode, useContext, useState } from "react";
+import { CartItem, OrderContextType, OrderType } from "../types/order";
 
 
 // Define a type for the context state
@@ -17,34 +18,12 @@ type Product = {
     variations?: ProductVariation[];  // Available variation options
 }
 
-type CartItem = {
-    id: string;
-    name: string;
-    price: number;
-    quantity: number;
-    selectedVariations?: Record<string, string>;  // e.g., { Size: "Large" }
-}
-
-type OrderContextType = {
-    orderType: string | null;
-    setOrderType: (orderType: string) => void;
-    cartItems: CartItem[];
-    addToCart: (item: CartItem) => void;
-    removeFromCart: (id: string) => void;
-    clearCart: () => void;
-    currentOrderId?: string;
-    setCurrentOrderId?: (id: string) => void;
-    openVariationModal: (product: Product) => void;
-    isVariationModalOpen: boolean;
-    selectedProduct: Product | null;
-}
-
 // Create the context
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
 // Provide the context to children components
 export const OrderProvider = ({ children }: { children: ReactNode }) => {
-    const [orderType, setOrderType] = useState<string | null>(null);
+    const [orderType, setOrderType] = useState<OrderType | null>(null);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [isVariationModalOpen, setIsVariationModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
