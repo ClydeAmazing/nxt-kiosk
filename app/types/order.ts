@@ -2,12 +2,16 @@ import { MenuItem } from "./menu";
 
 export type OrderType = 'DineIn' | 'TakeAway';
 
+export interface SelectedVariations {
+  [groupId: string]: string[]; // Array of variation IDs for each group
+}
+
 export interface CartItem {
   id: string;
   name: string;
   price: number;
   quantity: number;
-  selectedVariations?: Record<string, string>;
+  selectedVariations?: SelectedVariations;
 }
 
 export interface OrderContextType {

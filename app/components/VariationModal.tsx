@@ -1,15 +1,11 @@
 import { useState, useEffect } from "react";
-import { MenuItem } from "@/app/types";
-
-interface SelectedVariations {
-  [groupId: string]: string[]; // Array of variation IDs for each group
-}
+import { MenuItem, SelectedVariations } from "@/app/types";
 
 interface VariationModalProps {
   isOpen: boolean;
   onClose: () => void;
   item: MenuItem;
-  onConfirm: (variations: SelectedVariations, quantity: number) => void; // Updated to handle multiple variations
+  onConfirm: (item: MenuItem, variations: SelectedVariations, quantity: number) => void; // Updated to handle multiple variations
 }
 
 export default function VariationModal({ isOpen, onClose, item, onConfirm }: VariationModalProps) {
@@ -74,12 +70,6 @@ export default function VariationModal({ isOpen, onClose, item, onConfirm }: Var
       if (group.max_selections && selections.length > group.max_selections) return false;
       return true;
     });
-  };
-
-  const handleConfirm = (variations: SelectedVariations, quantity: number) => {
-    // Handle the selected variations and quantity
-    console.log('Selected variations:', variations);
-    console.log('Quantity:', quantity);
   };
 
   if (!isOpen) return null;
@@ -160,7 +150,7 @@ export default function VariationModal({ isOpen, onClose, item, onConfirm }: Var
           <button
             onClick={() => {
               if (isValid()) {
-                onConfirm(selectedVariations, quantity);
+                onConfirm(item, selectedVariations, quantity);
                 onClose();
               }
             }}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Image from 'next/image';
-import { MenuItem, CartItem, OrderContextType } from "@/app/types";
+import { MenuItem, SelectedVariations } from "@/app/types";
 import { menuService } from "@/app/services/menuService";
 import VariationModal from './VariationModal';
 import { useOrderContext } from '../context/OrderContext';
@@ -41,12 +41,8 @@ export default function MenuItemCard({ item }: MenuItemProps) {
     });
   }
 
-  const handleConfirmVariations = () => {
-    console.log(selectedVariations);
-    console.log(quantity);
-
-    // handleUpdateCart(item, 1, selectedVariations);
-    setIsVariationModalOpen(false);
+  const handleConfirmVariations = (item: MenuItem, variations: SelectedVariations, quantity: number) => {
+    handleUpdateCart(item, quantity, selectedVariations);
   };
 
   const handleAddToCart = () => {
